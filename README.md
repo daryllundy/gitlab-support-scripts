@@ -1,6 +1,6 @@
 # GitLab Support Scripts Collection 📚
 
-[![CI](https://github.com/username/gitlab-support-scripts/workflows/CI/badge.svg)](https://github.com/username/gitlab-support-scripts/actions)
+[![CI](https://github.com/username/gitlab-support-scripts/actions/workflows/ci.yml/badge.svg)](https://github.com/username/gitlab-support-scripts/actions/workflows/ci.yml)
 [![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.0-red.svg)](https://www.ruby-lang.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/username/gitlab-support-scripts)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
