@@ -47,9 +47,33 @@ ruby scripts/gitlab-health-check.rb
 - Standard Ruby libraries (net/http, json)
 - Scripts expect to connect to GitLab instances via HTTP/HTTPS
 
+## Testing
+
+Comprehensive test suite available in `tests/` directory:
+
+```bash
+# Run all tests
+./tests/run_tests.sh
+
+# Run specific test suite
+./tests/run_tests.sh health-check
+./tests/run_tests.sh db-analyzer
+./tests/run_tests.sh redis-monitor
+./tests/run_tests.sh sidekiq-stats
+./tests/run_tests.sh backup-verify
+```
+
+Test framework includes:
+- Mock GitLab API server using WEBrick
+- Comprehensive error handling tests
+- Network failure simulation
+- Authentication testing
+- File system mocking for backup tests
+
 ## Key Implementation Notes
 
 - Scripts use Ruby classes with descriptive names (e.g., `GitLabHealthCheck`)
 - Each script includes a main execution block with `if __FILE__ == $0`
 - Command-line arguments are handled via `ARGV`
 - Scripts are designed for GitLab support/administration (defensive security purposes)
+- All scripts include comprehensive error handling and graceful degradation
