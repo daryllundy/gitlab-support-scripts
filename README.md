@@ -1,17 +1,16 @@
 # GitLab Support Scripts Collection 📚
 
-[![CI](https://github.com/username/gitlab-support-scripts/actions/workflows/ci.yml/badge.svg)](https://github.com/username/gitlab-support-scripts/actions/workflows/ci.yml)
 [![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.0-red.svg)](https://www.ruby-lang.org/)
-[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/username/gitlab-support-scripts)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![GitLab Mirror](https://img.shields.io/badge/gitlab-mirror-orange.svg)](https://gitlab.com/username/gitlab-support-scripts)
-[![GitHub Release](https://img.shields.io/github/v/release/username/gitlab-support-scripts.svg)](https://github.com/username/gitlab-support-scripts/releases)
-[![GitHub Issues](https://img.shields.io/github/issues/username/gitlab-support-scripts.svg)](https://github.com/username/gitlab-support-scripts/issues)
+[![GitHub Release](https://img.shields.io/github/v/release/username/gitlab-support-scripts.svg)](https://github.com/daryllundy/gitlab-support-scripts/releases)
+[![GitHub Issues](https://img.shields.io/github/issues/username/gitlab-support-scripts.svg)](https://github.com/daryllundy/gitlab-support-scripts/issues)
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#testing)
 
 A collection of useful scripts for GitLab support and administration tasks.
 
 ## Scripts Included
+
 - `gitlab-health-check.rb` - Check GitLab instance health
 - `gitlab-db-analyzer.rb` - Analyze database performance
 - `gitlab-redis-monitor.rb` - Monitor Redis metrics
@@ -21,36 +20,47 @@ A collection of useful scripts for GitLab support and administration tasks.
 ## Usage
 
 ### GitLab Health Check
+
 ```bash
 ruby scripts/gitlab-health-check.rb https://gitlab.example.com
 ```
+
 Checks GitLab instance health including readiness, liveness, version, and database connectivity.
 
 ### Database Analyzer
+
 ```bash
 ruby scripts/gitlab-db-analyzer.rb https://gitlab.example.com [access_token]
 ```
+
 Analyzes database performance, slow queries, connection pool status, and table sizes.
 
 ### Redis Monitor
+
 ```bash
 ruby scripts/gitlab-redis-monitor.rb https://gitlab.example.com [access_token]
 ```
+
 Monitors Redis performance, memory usage, connection statistics, and key patterns.
 
 ### Sidekiq Statistics
+
 ```bash
 ruby scripts/gitlab-sidekiq-stats.rb https://gitlab.example.com [access_token]
 ```
+
 Analyzes Sidekiq queue performance, job statistics, worker performance, and failed jobs.
 
 ### Backup Verification
+
 ```bash
 ./scripts/gitlab-backup-verify.sh -d /path/to/backup/directory [-v] [-q]
 ```
+
 Verifies backup integrity, structure, age, and configuration files.
 
 Options:
+
 - `-d DIR`: Backup directory path (required)
 - `-v`: Verbose output
 - `-q`: Quick check (skip detailed analysis)
@@ -62,11 +72,13 @@ Options:
 A comprehensive test suite is included to verify script functionality:
 
 ### Run All Tests
+
 ```bash
 ./tests/run_tests.sh
 ```
 
 ### Run Specific Tests
+
 ```bash
 ./tests/run_tests.sh health-check     # Health check tests
 ./tests/run_tests.sh db-analyzer      # Database analyzer tests
@@ -76,11 +88,13 @@ A comprehensive test suite is included to verify script functionality:
 ```
 
 ### Test Dependencies
+
 - Ruby (with standard libraries)
 - WEBrick gem (for mock server): `gem install webrick`
 - Bash (for shell script tests)
 
 ### Test Coverage
+
 - **Health Check**: API endpoint testing, error handling, network failures
 - **Database Analyzer**: Query analysis, connection pool, authentication
 - **Redis Monitor**: Memory usage, connection stats, key patterns
@@ -92,11 +106,13 @@ A comprehensive test suite is included to verify script functionality:
 A Docker container is available for easy deployment and usage:
 
 ### Build the Container
+
 ```bash
 docker build -t gitlab-support-scripts .
 ```
 
 ### Run Commands Directly
+
 ```bash
 # Health check
 docker run --rm gitlab-support-scripts gitlab-health-check https://gitlab.example.com
@@ -115,6 +131,7 @@ docker run --rm -v /path/to/backups:/backups gitlab-support-scripts gitlab-backu
 ```
 
 ### Run Tests
+
 ```bash
 # Run all tests
 docker run --rm gitlab-support-scripts --test
@@ -124,6 +141,7 @@ docker run --rm gitlab-support-scripts run-tests health-check
 ```
 
 ### Interactive Mode
+
 ```bash
 # Start container with shell access
 docker run -it --rm gitlab-support-scripts bash
@@ -133,6 +151,7 @@ gitlab-health-check https://gitlab.example.com
 ```
 
 ### Get Help
+
 ```bash
 docker run --rm gitlab-support-scripts --help
 ```
@@ -205,4 +224,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **GitLab Mirror**: [GitLab Repository](https://gitlab.com/username/gitlab-support-scripts)
 
 ## Development
+
 This project is under active development.
