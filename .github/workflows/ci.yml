@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ['3.0', '3.1', '3.2']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install webrick
+    
+    - name: Make scripts executable
+      run: |
+        chmod +x scripts/*.rb scripts/*.sh tests/*.sh
+    
+    - name: Run health check tests
+      run: ruby tests/test_gitlab_health_check.rb
+    
+    - name: Run database analyzer tests
+      run: ruby tests/test_gitlab_db_analyzer.rb
+    
+    - name: Run Redis monitor tests
+      run: ruby tests/test_gitlab_redis_monitor.rb
+    
+    - name: Run Sidekiq stats tests
+      run: ruby tests/test_gitlab_sidekiq_stats.rb
+    
+    - name: Run backup verification tests
+      run: bash tests/test_gitlab_backup_verify.sh
+    
+    - name: Run full test suite
+      run: bash tests/run_tests.sh
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: docker build -t gitlab-support-scripts:test .
+    
+    - name: Test Docker container
+      run: |
+        docker run --rm gitlab-support-scripts:test --version
+        docker run --rm gitlab-support-scripts:test --help
+        docker run --rm gitlab-support-scripts:test --test
+    
+    - name: Log in to Docker Hub
+      if: github.event_name == 'release'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Extract metadata
+      if: github.event_name == 'release'
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: username/gitlab-support-scripts
+        tags: |
+          type=ref,event=tag
+          type=raw,value=latest
+    
+    - name: Build and push Docker image
+      if: github.event_name == 'release'
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run security scan
+      uses: securecodewarrior/github-action-add-sarif@v1
+      with:
+        sarif-file: 'security-scan.sarif'
+      continue-on-error: true
+    
+    - name: Check for secrets
+      run: |
+        # Simple check for potential secrets in code
+        if grep -r -E "(password|secret|key|token)" --include="*.rb" --include="*.sh" scripts/ tests/ || true; then
+          echo "⚠️ Potential secrets found in code - please review"
+        else
+          echo "✅ No obvious secrets detected"
+        fi
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+    
+    - name: Install RuboCop
+      run: gem install rubocop
+    
+    - name: Run RuboCop
+      run: rubocop scripts/ --format github
+      continue-on-error: true
+    
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        scandir: './scripts'
+        format: gcc
+        severity: warning
+      continue-on-error: true

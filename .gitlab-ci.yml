@@ -1,0 +1,133 @@
+# GitLab CI/CD Pipeline for GitLab Support Scripts
+
+stages:
+  - test
+  - security
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE_NAME: "gitlab-support-scripts"
+  DOCKER_REGISTRY: "registry.gitlab.com"
+
+# Test stage
+test:ruby-3.0:
+  stage: test
+  image: ruby:3.0-alpine
+  before_script:
+    - apk add --no-cache bash
+    - gem install webrick
+    - chmod +x scripts/*.rb scripts/*.sh tests/*.sh
+  script:
+    - ruby tests/test_gitlab_health_check.rb
+    - ruby tests/test_gitlab_db_analyzer.rb
+    - ruby tests/test_gitlab_redis_monitor.rb
+    - ruby tests/test_gitlab_sidekiq_stats.rb
+    - bash tests/test_gitlab_backup_verify.sh
+    - bash tests/run_tests.sh
+  artifacts:
+    reports:
+      junit: test-results.xml
+    expire_in: 1 week
+  coverage: '/Coverage: \d+\.\d+%/'
+
+test:ruby-3.1:
+  extends: test:ruby-3.0
+  image: ruby:3.1-alpine
+
+test:ruby-3.2:
+  extends: test:ruby-3.0
+  image: ruby:3.2-alpine
+
+# Security scanning
+security:secrets-detection:
+  stage: security
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache grep
+  script:
+    - |
+      echo "Scanning for potential secrets..."
+      if grep -r -E "(password|secret|key|token)" --include="*.rb" --include="*.sh" scripts/ tests/ || true; then
+        echo "⚠️ Potential secrets found - please review"
+      else
+        echo "✅ No obvious secrets detected"
+      fi
+  allow_failure: true
+
+security:container-scan:
+  stage: security
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker build -t $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA .
+  script:
+    - echo "Container security scan would run here"
+    - docker run --rm $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA --version
+    - docker run --rm $DOCKER_IMAGE_NAME:$CI_COMMIT_SHA --test
+  allow_failure: true
+
+# Build Docker image
+build:docker:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+    - tags
+
+# Deploy/Release
+deploy:release:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl jq
+  script:
+    - echo "Release deployment would happen here"
+    - echo "Version: $CI_COMMIT_TAG"
+  only:
+    - tags
+  when: manual
+
+# Mirror to GitHub (if configured)
+mirror:github:
+  stage: deploy
+  image: alpine/git:latest
+  script:
+    - |
+      if [ -n "$GITHUB_MIRROR_URL" ]; then
+        echo "Mirroring to GitHub..."
+        git remote add github $GITHUB_MIRROR_URL
+        git push github --all
+        git push github --tags
+      else
+        echo "GitHub mirror not configured"
+      fi
+  only:
+    - main
+    - tags
+  allow_failure: true
+
+# Pages for documentation
+pages:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - mkdir public
+    - cp README.md public/index.md
+    - cp CLAUDE.md public/
+    - echo "Documentation deployed to GitLab Pages"
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

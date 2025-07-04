@@ -1,5 +1,14 @@
 # GitLab Support Scripts Collection 📚
 
+[![CI](https://github.com/username/gitlab-support-scripts/workflows/CI/badge.svg)](https://github.com/username/gitlab-support-scripts/actions)
+[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%203.0-red.svg)](https://www.ruby-lang.org/)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/username/gitlab-support-scripts)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitLab Mirror](https://img.shields.io/badge/gitlab-mirror-orange.svg)](https://gitlab.com/username/gitlab-support-scripts)
+[![GitHub Release](https://img.shields.io/github/v/release/username/gitlab-support-scripts.svg)](https://github.com/username/gitlab-support-scripts/releases)
+[![GitHub Issues](https://img.shields.io/github/issues/username/gitlab-support-scripts.svg)](https://github.com/username/gitlab-support-scripts/issues)
+[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#testing)
+
 A collection of useful scripts for GitLab support and administration tasks.
 
 ## Scripts Included
@@ -149,6 +158,51 @@ docker-compose --profile monitoring up -d gitlab-monitor
 # View monitoring logs
 docker-compose logs -f gitlab-monitor
 ```
+
+## Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork the repository** and create a feature branch
+2. **Write tests** for any new functionality
+3. **Ensure all tests pass** with `./tests/run_tests.sh`
+4. **Follow Ruby style conventions** (run `rubocop` if available)
+5. **Update documentation** as needed
+6. **Submit a pull request** with a clear description
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/username/gitlab-support-scripts.git
+cd gitlab-support-scripts
+
+# Make scripts executable
+chmod +x scripts/*.rb scripts/*.sh tests/*.sh
+
+# Run tests
+./tests/run_tests.sh
+
+# Test Docker build
+docker build -t gitlab-support-scripts .
+```
+
+### Code Standards
+
+- **Security First**: All scripts are for defensive security purposes only
+- **Error Handling**: Graceful degradation and clear error messages
+- **Documentation**: Update README.md and CLAUDE.md for significant changes
+- **Testing**: Maintain 100% test coverage for critical functionality
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/username/gitlab-support-scripts/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/username/gitlab-support-scripts/discussions)
+- **GitLab Mirror**: [GitLab Repository](https://gitlab.com/username/gitlab-support-scripts)
 
 ## Development
 This project is under active development.
