@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for gitlab-db-analyzer.rb
+# Allows running without 'ruby' prefix
+
+exec ruby /app/scripts/gitlab-db-analyzer.rb "$@"

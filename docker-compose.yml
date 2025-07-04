@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  gitlab-support-scripts:
+    build: .
+    image: gitlab-support-scripts:latest
+    container_name: gitlab-support-scripts
+    
+    # Environment variables for GitLab connection
+    environment:
+      - GITLAB_URL=${GITLAB_URL:-https://gitlab.example.com}
+      - GITLAB_TOKEN=${GITLAB_TOKEN:-}
+    
+    # Mount backup directory for verification
+    volumes:
+      - ${BACKUP_DIR:-./backups}:/backups:ro
+      - ./output:/app/output
+    
+    # Override entrypoint for long-running scenarios
+    # By default, container will show help and exit
+    # Use 'docker-compose run gitlab-support-scripts <command>' for one-off commands
+    
+    # For cron-like scheduled health checks, uncomment below:
+    # command: >
+    #   bash -c "
+    #     while true; do
+    #       echo '[$(date)] Running health check...'
+    #       gitlab-health-check $$GITLAB_URL > /app/output/health-check-$(date +%Y%m%d_%H%M%S).log 2>&1
+    #       echo '[$(date)] Sleeping for 1 hour...'
+    #       sleep 3600
+    #     done
+    #   "
+    
+    # Network mode for accessing external GitLab instances
+    network_mode: host
+    
+    # Restart policy (only useful if running as daemon)
+    restart: "no"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # Example scheduled monitoring service
+  gitlab-monitor:
+    build: .
+    image: gitlab-support-scripts:latest
+    container_name: gitlab-monitor
+    profiles:
+      - monitoring
+    
+    environment:
+      - GITLAB_URL=${GITLAB_URL:-https://gitlab.example.com}
+      - GITLAB_TOKEN=${GITLAB_TOKEN:-}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-3600}
+    
+    volumes:
+      - ./monitoring-output:/app/output
+      - ./monitoring-logs:/app/logs
+    
+    command: >
+      bash -c "
+        echo 'Starting GitLab monitoring service...'
+        while true; do
+          timestamp=$$(date '+%Y%m%d_%H%M%S')
+          echo '[$(date)] Running comprehensive GitLab monitoring...'
+          
+          # Health check
+          gitlab-health-check $$GITLAB_URL > /app/output/health-$$timestamp.log 2>&1
+          
+          # Database analysis (if token provided)
+          if [ -n \"$$GITLAB_TOKEN\" ]; then
+            gitlab-db-analyzer $$GITLAB_URL $$GITLAB_TOKEN > /app/output/db-$$timestamp.log 2>&1
+            gitlab-redis-monitor $$GITLAB_URL $$GITLAB_TOKEN > /app/output/redis-$$timestamp.log 2>&1
+            gitlab-sidekiq-stats $$GITLAB_URL $$GITLAB_TOKEN > /app/output/sidekiq-$$timestamp.log 2>&1
+          fi
+          
+          echo '[$(date)] Monitoring cycle completed. Sleeping for $$CHECK_INTERVAL seconds...'
+          sleep $$CHECK_INTERVAL
+        done
+      "
+    
+    network_mode: host
+    restart: unless-stopped
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M

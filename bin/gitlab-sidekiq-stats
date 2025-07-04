@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for gitlab-sidekiq-stats.rb
+# Allows running without 'ruby' prefix
+
+exec ruby /app/scripts/gitlab-sidekiq-stats.rb "$@"

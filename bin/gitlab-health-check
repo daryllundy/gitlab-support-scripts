@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for gitlab-health-check.rb
+# Allows running without 'ruby' prefix
+
+exec ruby /app/scripts/gitlab-health-check.rb "$@"

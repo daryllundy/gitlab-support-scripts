@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for gitlab-backup-verify.sh
+# Direct execution of the shell script
+
+exec /app/scripts/gitlab-backup-verify.sh "$@"

@@ -1,0 +1,33 @@
+# Git files
+.git
+.gitignore
+
+# Documentation (except essential files)
+*.md
+!README.md
+!CLAUDE.md
+
+# Development files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log
+
+# Test artifacts
+coverage/
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*
+.dockerignore

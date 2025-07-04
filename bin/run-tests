@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for test runner
+# Allows running tests from the container
+
+exec /app/tests/run_tests.sh "$@"

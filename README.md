@@ -78,5 +78,77 @@ A comprehensive test suite is included to verify script functionality:
 - **Sidekiq Statistics**: Queue analysis, job stats, worker performance
 - **Backup Verification**: File integrity, structure validation, age checks
 
+## Docker Usage
+
+A Docker container is available for easy deployment and usage:
+
+### Build the Container
+```bash
+docker build -t gitlab-support-scripts .
+```
+
+### Run Commands Directly
+```bash
+# Health check
+docker run --rm gitlab-support-scripts gitlab-health-check https://gitlab.example.com
+
+# Database analysis (with token)
+docker run --rm gitlab-support-scripts gitlab-db-analyzer https://gitlab.example.com glpat-xxxxxxxxxxxxxxxxxxxx
+
+# Redis monitoring
+docker run --rm gitlab-support-scripts gitlab-redis-monitor https://gitlab.example.com glpat-xxxxxxxxxxxxxxxxxxxx
+
+# Sidekiq statistics
+docker run --rm gitlab-support-scripts gitlab-sidekiq-stats https://gitlab.example.com glpat-xxxxxxxxxxxxxxxxxxxx
+
+# Backup verification (mount backup directory)
+docker run --rm -v /path/to/backups:/backups gitlab-support-scripts gitlab-backup-verify -d /backups -v
+```
+
+### Run Tests
+```bash
+# Run all tests
+docker run --rm gitlab-support-scripts --test
+
+# Run specific tests
+docker run --rm gitlab-support-scripts run-tests health-check
+```
+
+### Interactive Mode
+```bash
+# Start container with shell access
+docker run -it --rm gitlab-support-scripts bash
+
+# Then run commands directly
+gitlab-health-check https://gitlab.example.com
+```
+
+### Get Help
+```bash
+docker run --rm gitlab-support-scripts --help
+```
+
+### Docker Compose
+
+For more complex deployments, use the provided `docker-compose.yml`:
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your GitLab URL and token
+# GITLAB_URL=https://your-gitlab.com
+# GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxxxxxx
+
+# Run one-off commands
+docker-compose run --rm gitlab-support-scripts gitlab-health-check
+
+# Start monitoring service (runs health checks every hour)
+docker-compose --profile monitoring up -d gitlab-monitor
+
+# View monitoring logs
+docker-compose logs -f gitlab-monitor
+```
+
 ## Development
 This project is under active development.

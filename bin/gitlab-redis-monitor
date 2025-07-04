@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Wrapper script for gitlab-redis-monitor.rb
+# Allows running without 'ruby' prefix
+
+exec ruby /app/scripts/gitlab-redis-monitor.rb "$@"
